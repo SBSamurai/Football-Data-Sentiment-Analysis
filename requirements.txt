@@ -1,0 +1,13 @@
+streamlit==1.53.1
+pandas==2.3.3
+numpy==2.4.2
+google-api-python-client
+transformers
+torch
+scipy
+matplotlib
+requests
+beautifulsoup4
+understat
+openpyxl
+toml
