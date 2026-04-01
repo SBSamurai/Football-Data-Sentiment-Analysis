@@ -92,6 +92,10 @@ if submitted:
             st.error('Sorry, no records found for the entered teams.')
             st.stop()#
 
+    # Track if user provided a date or if we auto-selected the latest
+    user_provided_date = match_date is not None
+    original_match_date = match_date
+
     if not match_date:
         latest_match = get_last_result(df, team_a, team_b)
         if latest_match:
@@ -115,24 +119,18 @@ if submitted:
                 st.error("No historical match found between these teams.")
                 st.stop()
 
-    # ── Step 0: Compute last result ──────────────────────────────
-    last_res = get_last_result(df, team_a, team_b)
-    actual_result = last_res or 'Result unavailable'
-    if last_res:
-        st.info(f"Latest match between {team_a} and {team_b}: {actual_result}")
-    else:
-        st.warning('No previous meeting found; actual result not available.')
-
     # ── Validate date and team combination ───────────────────────
-    # Check if there was actually a match between these teams on the selected date
-    match_exists = (
-        ((df.team_a == team_a) & (df.team_b == team_b)) |
-        ((df.team_a == team_b) & (df.team_b == team_a))
-    ) & (df.date == match_date)
-    
-    if not match_exists.any():
-        st.error('Wrong date and team combination. No match found between these teams on the selected date.')
-        st.stop()
+    # Only validate if user explicitly provided a date (not auto-selected latest)
+    if user_provided_date:
+        # Check if there was actually a match between these teams on the selected date
+        match_exists = (
+            ((df.team_a == team_a) & (df.team_b == team_b)) |
+            ((df.team_a == team_b) & (df.team_b == team_a))
+        ) & (df.date == original_match_date)
+        
+        if not match_exists.any():
+            st.error('Wrong date and team combination. No match found between these teams on the selected date.')
+            st.stop()
 
     # ── Step 1: Find YouTube match video ─────────────────────────
     match_date_str = match_date.strftime('%Y-%m-%d')
