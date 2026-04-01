@@ -123,6 +123,17 @@ if submitted:
     else:
         st.warning('No previous meeting found; actual result not available.')
 
+    # ── Validate date and team combination ───────────────────────
+    # Check if there was actually a match between these teams on the selected date
+    match_exists = (
+        ((df.team_a == team_a) & (df.team_b == team_b)) |
+        ((df.team_a == team_b) & (df.team_b == team_a))
+    ) & (df.date == match_date)
+    
+    if not match_exists.any():
+        st.error('Wrong date and team combination. No match found between these teams on the selected date.')
+        st.stop()
+
     # ── Step 1: Find YouTube match video ─────────────────────────
     match_date_str = match_date.strftime('%Y-%m-%d')
 
