@@ -164,7 +164,7 @@ if submitted:
             domain=['Positive', 'Neutral', 'Negative'],
             range=['#2ca02c', '#ff7f0e', '#d62728']
         ))
-    ).properties(height=280, use_container_width=480)
+    ).properties(height=280, width=480)
     st.altair_chart(sentiment_chart, use_container_width=True)
 
     # ── Step 4: Post-Match Analysis Sentiment ─────────────────────
@@ -224,7 +224,7 @@ if submitted:
             domain=['Wins', 'Draws', 'Losses'],
             range=['#1f77b4', '#ff7f0e', '#2ca02c']
         )),
-    ).properties(height=280, use_container_width=480)
+    ).properties(height=280, width=480)
     st.altair_chart(form_chart_a, use_container_width=True)
 
     col1, col2, col3 = st.columns(3)
@@ -254,7 +254,7 @@ if submitted:
             domain=['Wins', 'Draws', 'Losses'],
             range=['#1f77b4', '#ff7f0e', '#2ca02c']
         )),
-    ).properties(height=280, use_container_width=480)
+    ).properties(height=280, width=480)
     st.altair_chart(form_chart_b, use_container_width=True)
 
     col1, col2, col3 = st.columns(3)
@@ -298,7 +298,7 @@ if submitted:
                 domain=[f'{team_a} Wins', 'Draws', f'{team_b} Wins'],
                 range=['#1f77b4', '#ff7f0e', '#2ca02c']
             )),
-        ).properties(height=280, use_container_width=480)
+        ).properties(height=280, width=480)
         st.altair_chart(h2h_chart, use_container_width=True)
 
     # ── Team Stats Comparison ─────────────────────────────────────
@@ -316,7 +316,7 @@ if submitted:
         y=alt.Y('Value:Q', title='Value'),
         color=alt.Color('Team:N', title='Team'),
         xOffset='Team:N'
-    ).properties(height=360, use_container_width=700)
+    ).properties(height=360, width=700)
     st.altair_chart(comparison_chart, use_container_width=True)
 
     # ── Correlation Analysis: Form vs Outcome ─────────────────────
