@@ -72,7 +72,10 @@ if submitted:
         st.error('Please select both Team A and Team B')
         st.stop()
 
-    df = load_matches()
+    df = load_matches(enrich=False)  # Load without enrichment to avoid API failures
+
+    # Initialize actual_result to avoid undefined variable errors
+    actual_result = 'Result unavailable'
 
     missing = []
     for t in (team_a, team_b):
@@ -81,7 +84,7 @@ if submitted:
     if missing:
         with st.spinner('Fetching statistics for the teams...'):
             update_matches_csv()
-        df = load_matches()
+        df = load_matches(enrich=False)  # Reload without enrichment
 
         # Check if teams are still missing after update
         still_missing = []
@@ -109,7 +112,7 @@ if submitted:
         else:
             with st.spinner('Fetching statistics for the teams...'):
                 update_matches_csv()
-            df = load_matches()
+            df = load_matches(enrich=False)  # Reload without enrichment  # Reload data after update
             latest_match = get_last_result(df, team_a, team_b)
             if latest_match:
                 h2h = get_head_to_head(df, team_a, team_b, last_n=1)
@@ -121,16 +124,35 @@ if submitted:
 
     # ── Validate date and team combination ───────────────────────
     # Only validate if user explicitly provided a date (not auto-selected latest)
-    if user_provided_date:
-        # Check if there was actually a match between these teams on the selected date
-        match_exists = (
-            ((df.team_a == team_a) & (df.team_b == team_b)) |
-            ((df.team_a == team_b) & (df.team_b == team_a))
-        ) & (df.date == original_match_date)
-        
-        if not match_exists.any():
-            st.error('Wrong date and team combination. No match found between these teams on the selected date.')
-            st.stop()
+    if user_provided_date and not df.empty:
+        try:
+            # Convert the user-provided date to match the format in the dataframe
+            # Assume df.date is in YYYY-MM-DD format (string)
+            date_str = original_match_date.strftime('%Y-%m-%d')
+            
+            # Check if there was actually a match between these teams on the selected date
+            # Use case-insensitive partial matching for team names
+            team_a_lower = team_a.lower()
+            team_b_lower = team_b.lower()
+            
+            match_exists = (
+                (
+                    (df.team_a.str.lower().str.contains(team_a_lower, na=False)) & 
+                    (df.team_b.str.lower().str.contains(team_b_lower, na=False))
+                ) |
+                (
+                    (df.team_a.str.lower().str.contains(team_b_lower, na=False)) & 
+                    (df.team_b.str.lower().str.contains(team_a_lower, na=False))
+                )
+            ) & (df.date.astype(str).str.startswith(date_str, na=False))
+            
+            if not match_exists.any():
+                st.error('Wrong date and team combination. No match found between these teams on the selected date.')
+                st.stop()
+        except Exception as e:
+            # If validation fails for any reason, show a warning but don't block
+            st.warning(f'Could not validate date/team combination: {str(e)}. Proceeding anyway.')
+            pass
 
     # ── Step 1: Find YouTube match video ─────────────────────────
     match_date_str = match_date.strftime('%Y-%m-%d')
