@@ -56,11 +56,14 @@ with st.form('query_form'):
 
     if selected_league != 'All Leagues':
         competition = selected_league
-        st.info(f'Using league: {competition}')
+        st.text_input(
+            'Competition (auto-selected)',
+            value=competition,
+            disabled=True,
+            help='Competition is set by your league selection above'
+        )
     else:
-        comp_options = sorted(all_competitions) if all_competitions else \
-            ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1', 'Champions League']
-        competition = st.selectbox('Competition (optional)', comp_options, index=0 if comp_options else None)
+        competition = None
     
     submitted = st.form_submit_button('🔍  Analyze Outcome')
 
