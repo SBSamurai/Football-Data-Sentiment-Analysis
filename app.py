@@ -156,6 +156,41 @@ if submitted:
             # If validation fails for any reason, show a warning but don't block
             st.warning(f'Could not validate date/team combination: {str(e)}. Proceeding anyway.')
             pass
+    # ── Fetch Actual Match Result ─────────────────────────────
+    try:
+        date_str = match_date.strftime('%Y-%m-%d')
+
+        match_row = df[
+            (
+                ((df.team_a == team_a) & (df.team_b == team_b)) |
+                ((df.team_a == team_b) & (df.team_b == team_a))
+            ) &
+            (df.date.astype(str).str.startswith(date_str))
+        ]
+
+        if not match_row.empty:
+            row = match_row.iloc[0]
+
+            def fmt(score):
+                try:
+                    return int(score)
+                except Exception:
+                    return score
+
+            if row['team_a'] == team_a:
+                actual_result = f"{team_a} {fmt(row['score_a'])} - {fmt(row['score_b'])} {team_b}"
+            else:
+                actual_result = f"{team_a} {fmt(row['score_b'])} - {fmt(row['score_a'])} {team_b}"
+        else:
+            actual_result = 'Result unavailable'
+            if user_provided_date:
+                st.warning(f"No result found for {team_a} vs {team_b} on {date_str}")
+
+    except Exception as e:
+        st.warning(f"Could not retrieve match result: {e}")
+        actual_result = 'Result unavailable'
+        
+        
 
     # ── Step 1: Find YouTube match video ─────────────────────────
     match_date_str = match_date.strftime('%Y-%m-%d')
